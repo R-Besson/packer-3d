@@ -16,7 +16,7 @@ pub type Minimize = (bool, bool, bool);
 
 fn cut(b: &Box3D, hole: &Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mut u32)
 {
-    let mut new_holes = Vec::<Box3D>::new();
+    let mut new_holes = Vec::<Box3D>::default();
 
     let x2 = b.x2();
     let y2 = b.y2();
@@ -668,7 +668,7 @@ fn cut(b: &Box3D, hole: &Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mu
 pub fn update_holes(b: &mut Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mut u32)
 {
     // Cut holes
-    let mut new_holes = HashSetFnv::<Box3D>::new();
+    let mut new_holes = HashSetFnv::<Box3D>::default();
 
     for hole in holes.iter() {
         // If the Current Box3D overlaps with a hole, we break the hole into new holes
@@ -903,7 +903,7 @@ pub fn setup_packer(boxes: &mut [Box3D], w: i32, h: i32, l: i32, minimize: Minim
     let mut boxes: Vec<Box3D> = boxes.to_owned();
     boxes.sort_by(sorting_func);
 
-    let mut holes = HashSetFnv::<Box3D>::new();
+    let mut holes = HashSetFnv::<Box3D>::default();
     holes.insert(Box3D::from_xyz_whl(0, 0, 0,
         if minimize.0 {i32::MAX} else {w},
         if minimize.1 {i32::MAX} else {h},
