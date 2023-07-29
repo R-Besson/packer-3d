@@ -1,4 +1,4 @@
-# packer-3d
+# packer-3d v0.2.0
 > Rust Crate for 3-dimensional packing of boxes optimally along x, y or z, or all three axis.
 
 ![Example of what you can expect](./images/example.png)
@@ -10,7 +10,7 @@ $ cargo add packer-3d
 ```
 OR place this under `[dependencies]` in `Cargo.toml`
 ```
-packer-3d = "0.1.0"
+packer-3d = "0.2.0"
 ```
 
 ## Example
