@@ -8,9 +8,5 @@ description = "Deterministic packing algorithm for 3D container packing which op
 license = "CC-BY-NC-SA-4.0"
 repository = "https://github.com/r-besson/packer-3d"
 
-[features]
-default = ["std"]
-std = []
-
 [dependencies]
 fnv = "1.0.7"
