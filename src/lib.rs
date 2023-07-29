@@ -30,56 +30,6 @@
 //!     println!("{:#?}", my_instance.boxes);
 //! }
 //! ```
-//! 
-//! ## Ouput:
-//! ```
-//! [
-//!     Box3D {
-//!         position: Vector3D {
-//!             x: 0,
-//!             y: 0,
-//!             z: 0,
-//!         },
-//!         size: Vector3D {
-//!             x: 300,
-//!             y: 100,
-//!             z: 200,
-//!         },
-//!         id: 1,
-//!         origin: 0,
-//!     },
-//!     Box3D {
-//!         position: Vector3D {
-//!             x: 300,
-//!             y: 0,
-//!             z: 0,
-//!         },
-//!         size: Vector3D {
-//!             x: 200,
-//!             y: 100,
-//!             z: 300,
-//!         },
-//!         id: 2,
-//!         origin: 0,
-//!     },
-//!     Box3D {
-//!         position: Vector3D {
-//!             x: 0,
-//!             y: 0,
-//!             z: 200,
-//!         },
-//!         size: Vector3D {
-//!             x: 300,
-//!             y: 100,
-//!             z: 200,
-//!         },
-//!         id: 3,
-//!         origin: 0,
-//!     },
-//! ]
-//! ```
-//! Which corresponds to:
-//! ![Result Visualized](../images/result.png)
 
 pub mod box3d;
 pub mod vector3d;
@@ -110,7 +60,7 @@ pub type HashSetFnv<V> = HashSet<V, BuildHasherDefault<FnvHasher>>;
 /// ```
 /// Will minimize the width (x) of the container,\
 /// and the length (z) of the container\
-/// However, the height (y) of the container will be specified via [setup_packer](setup_packer) and [pack_next](pack_next).
+/// However, the height (y) of the container will be specified via container_size in [PackerInstance::new()](PackerInstance::new)
 pub type Minimize = (bool, bool, bool);
 
 fn cut(b: &Box3D, hole: &Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mut u32)

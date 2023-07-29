@@ -1,4 +1,4 @@
-//! Sorting functions used by [setup_packer](setup_packer)
+//! Sorting functions used by [PackerInstance](crate::PackerInstance)
 
 use crate::box3d::Box3D;
 
