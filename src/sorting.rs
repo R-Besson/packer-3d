@@ -124,4 +124,27 @@ impl Sorting {
     {
         Self::descending_id(b, a)
     }
+
+    pub fn get(name: &str) -> &'static dyn Fn(&Box3D,&Box3D) -> Ordering
+    {
+        match name
+        {
+            "Descending Volume" => &Sorting::descending_volume,
+            "Ascending Volume" => &Sorting::ascending_volume,
+
+            "Descending Width" => &Sorting::descending_width,
+            "Ascending Width" => &Sorting::ascending_width,
+
+            "Descending Height" => &Sorting::descending_height,
+            "Ascending Height" => &Sorting::ascending_height,
+
+            "Descending Length" => &Sorting::descending_length,
+            "Ascending Length" => &Sorting::ascending_length,
+
+            "Descending Id" => &Sorting::descending_id,
+            "Ascending Id" => &Sorting::ascending_id,
+
+            _ => &Sorting::descending_volume,
+        }
+    }
 }
