@@ -1,4 +1,85 @@
 //! Rust Crate for 3-dimensional packing of boxes optimally along x, y or z, or all three axis.
+//! ## Example
+//! ```
+//! use packer_3d::{
+//!     PackerInstance,
+//!     sorting::Sorting,
+//!     box3d::Box3D,
+//!     vector3d::Vector3D
+//! };
+//!
+//! fn main() {
+//!     let mut my_boxes = vec![
+//!         Box3D::from_xyz_whl(0,0,0,100,200,300,1,0),
+//!         Box3D::from_xyz_whl(0,0,0,100,200,300,2,0),
+//!         Box3D::from_xyz_whl(0,0,0,100,200,300,3,0)
+//!     ];
+//! 
+//!     let mut my_instance = PackerInstance::new(
+//!         &mut my_boxes, // Our boxes
+//!         Vector3D::new(500, 0, 500), // Our container size
+//!         true, // No rotations
+//!         (false, true, false), // Minimize height only
+//!         &Sorting::descending_volume // Our initial sorting heuristic
+//!     );
+//!
+//!     for _ in 0..3 {
+//!         my_instance.pack_next();
+//!     }
+//!
+//!     println!("{:#?}", my_instance.boxes);
+//! }
+//! ```
+//! 
+//! ## Ouput:
+//! ```
+//! [
+//!     Box3D {
+//!         position: Vector3D {
+//!             x: 0,
+//!             y: 0,
+//!             z: 0,
+//!         },
+//!         size: Vector3D {
+//!             x: 300,
+//!             y: 100,
+//!             z: 200,
+//!         },
+//!         id: 1,
+//!         origin: 0,
+//!     },
+//!     Box3D {
+//!         position: Vector3D {
+//!             x: 300,
+//!             y: 0,
+//!             z: 0,
+//!         },
+//!         size: Vector3D {
+//!             x: 200,
+//!             y: 100,
+//!             z: 300,
+//!         },
+//!         id: 2,
+//!         origin: 0,
+//!     },
+//!     Box3D {
+//!         position: Vector3D {
+//!             x: 0,
+//!             y: 0,
+//!             z: 200,
+//!         },
+//!         size: Vector3D {
+//!             x: 300,
+//!             y: 100,
+//!             z: 200,
+//!         },
+//!         id: 3,
+//!         origin: 0,
+//!     },
+//! ]
+//! ```
+//! Which corresponds to:
+//! ![Result Visualized](../images/result.png)
 
 pub mod box3d;
 pub mod vector3d;
@@ -920,23 +1001,25 @@ fn get_best_hole(b: &Box3D, holes: &mut HashSetFnv<Box3D>, do_rotations: bool, m
 /// Main PackerInstance struct
 /// ## Example
 /// ```rust
-/// let my_boxes = vec![
+/// let mut my_boxes = vec![
 ///     Box3D::from_xyz_whl(0,0,0,100,200,300,1,0),
 ///     Box3D::from_xyz_whl(0,0,0,100,200,300,2,0),
 ///     Box3D::from_xyz_whl(0,0,0,100,200,300,3,0)
 /// ];
-/// 
-/// let my_instance = PackerInstance::new(
+///
+/// let mut my_instance = PackerInstance::new(
 ///     &mut my_boxes, // Our boxes
 ///     Vector3D::new(500, 0, 500), // Our container size
-///     true, // Allow rotations
+///     true, // No rotations
 ///     (false, true, false), // Minimize height only
 ///     &Sorting::descending_volume // Our initial sorting heuristic
 /// );
-/// 
-/// for n in 0..3 {
+///
+/// for _ in 0..3 {
 ///     my_instance.pack_next();
 /// }
+///
+/// println!("{:#?}", my_instance.boxes);
 /// ```
 #[derive(Default, Debug, Clone)]
 pub struct PackerInstance {
@@ -1002,6 +1085,9 @@ impl PackerInstance {
         };
     
         // Update the holes
-        self.next_hole_id = update_holes(b, &mut self.holes, self.next_hole_id)
+        self.next_hole_id = update_holes(b, &mut self.holes, self.next_hole_id);
+
+        // Change for next box id
+        self.next_box_id += 1;
     }
 }
