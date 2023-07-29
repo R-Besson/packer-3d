@@ -92,3 +92,5 @@ Which should output:
     },
 ]
 ```
+Visualized this gives:
+![Result Visualized](./images/result.png)
