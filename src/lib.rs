@@ -1,3 +1,5 @@
+//! I document lib.rs
+
 pub mod box3d;
 pub mod vector3d;
 pub mod sorting;
@@ -5,11 +7,11 @@ pub mod sorting;
 use box3d::*;
 use std::cmp::Ordering;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::hash::BuildHasherDefault;
 use fnv::FnvHasher;
 
-pub type HashMapFnv<K, V> = HashMap<K, V, BuildHasherDefault<FnvHasher>>;
+/// Hash Set using [fnv](https://crates.io/crates/fnv): an implementation of the [Fowler–Noll–Vo hash function](http://www.isthe.com/chongo/tech/comp/fnv/index.html).
 pub type HashSetFnv<V> = HashSet<V, BuildHasherDefault<FnvHasher>>;
 
 pub type Minimize = (bool, bool, bool);
@@ -665,7 +667,7 @@ fn cut(b: &Box3D, hole: &Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mu
     }
 }
 
-pub fn update_holes(b: &mut Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mut u32)
+fn update_holes(b: &mut Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mut u32)
 {
     // Cut holes
     let mut new_holes = HashSetFnv::<Box3D>::default();
@@ -692,7 +694,7 @@ fn get_new_l(hole: &Box3D, b: &Box3D) -> i32 {
     hole.position.z + b.size.z
 }
 
-pub fn is_better_hole(b: &Box3D, hole: &Box3D, best_hole: Option<Box3D>, min_w: i32, min_h: i32, min_l: i32, minimize: Minimize) -> bool
+fn is_better_hole(b: &Box3D, hole: &Box3D, best_hole: Option<Box3D>, min_w: i32, min_h: i32, min_l: i32, minimize: Minimize) -> bool
 {
     if !b.fits_in(hole) { return false; } // Box3D fits in the hole 
 

@@ -1,42 +1,49 @@
+//! 3-dimensional box
 use crate::vector3d::*;
 use crate::HashSetFnv;
 
-// CUBE //
+/// The structure of a 3-dimensional box
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub struct Box3D {
-	pub position: Vector3,
-	pub size: Vector3,
+    /// Corresponds to `x`,`y`,`z` properties
+	pub position: Vector3D,
+    /// Corresponds to `w`,`h`,`l` properties
+	pub size: Vector3D,
+    /// ID for each box
 	pub id: u32,
+    /// Keeps a trace of how the box evolved (only for debugging)
 	pub origin: u16,
 }
 
 impl Box3D {
 
-	// Method to create a new instance of Box3D
-	pub fn from_size_position(position: Vector3, size: Vector3, id: u32, origin: u16) -> Box3D
+	/// Create Box3D from `position`, and `size`
+	pub fn from_position_size(position: Vector3D, size: Vector3D, id: u32, origin: u16) -> Box3D
 	{
 		Box3D { position, size, id, origin }
 	}
 
-	// Method 2 to create a new instance of Box3D
+	/// Create Box3D from `xyz`, and `whl`
 	pub fn from_xyz_whl(x: i32, y: i32, z: i32, w: i32, h: i32, l: i32, id: u32, origin: u16) -> Box3D
 	{
-		let position = Vector3::new(x,y,z);
-		let size = Vector3::new(w,h,l);
+		let position = Vector3D::new(x,y,z);
+		let size = Vector3D::new(w,h,l);
 		Box3D { position, size, id, origin }
 	}
 
-	// Method to calculate the volume of the cube
+	/// Volume of the Box
 	pub fn volume(&self) -> i32
 	{
 		self.size.x * self.size.y * self.size.z
 	}
 
+    /// Box is smaller than other
 	pub fn fits_in(&self, other: &Box3D) -> bool
 	{
 		self.size.x <= other.size.x && self.size.y <= other.size.y && self.size.z <= other.size.z
 	}
 
+    /// Box is inside other in terms of size AND position
 	pub fn is_in(&self, other: &Box3D) -> bool 
 	{   // Check if shape IS in 'other' shape using
 		// a comparison of positions
@@ -62,6 +69,7 @@ impl Box3D {
 		self.position.z + self.size.z
 	}
 
+    /// Box strictly (doesn't only touch) intersects other
 	pub fn intersects(&self, other: &Box3D) -> bool
 	{
 		range_overlap(self.position.x, self.x2(), other.position.x, other.x2()) &&
@@ -69,6 +77,7 @@ impl Box3D {
 		range_overlap(self.position.z, self.z2(), other.position.z, other.z2())
 	}
 
+    /// Returns whether Box is covered among other Boxes
 	pub fn is_covered_among(&self, boxes: &HashSetFnv<Box3D>) -> bool
 	{
 		// Iterates through all the shapes and checks if it is covered by a Shape AND
@@ -81,15 +90,16 @@ impl Box3D {
 		false
 	}
 
+    /// Gets the new 6 boxes with sizes adjusted according to rotation
 	pub fn get_rotations(&self) -> Vec<Box3D>
 	{
 		vec![
-			Box3D::from_size_position(self.position, Vector3::new(self.size.x, self.size.y, self.size.z), self.id, 0), // w,h,l
-			Box3D::from_size_position(self.position, Vector3::new(self.size.y, self.size.x, self.size.z), self.id, 0), // h,w,l
-			Box3D::from_size_position(self.position, Vector3::new(self.size.z, self.size.y, self.size.x), self.id, 0), // l,h,w
-			Box3D::from_size_position(self.position, Vector3::new(self.size.x, self.size.z, self.size.y), self.id, 0), // w,l,h
-			Box3D::from_size_position(self.position, Vector3::new(self.size.z, self.size.x, self.size.y), self.id, 0), // l,w,h
-			Box3D::from_size_position(self.position, Vector3::new(self.size.y, self.size.z, self.size.x), self.id, 0)  // h,l,w
+			Box3D::from_position_size(self.position, Vector3D::new(self.size.x, self.size.y, self.size.z), self.id, 0), // w,h,l
+			Box3D::from_position_size(self.position, Vector3D::new(self.size.y, self.size.x, self.size.z), self.id, 0), // h,w,l
+			Box3D::from_position_size(self.position, Vector3D::new(self.size.z, self.size.y, self.size.x), self.id, 0), // l,h,w
+			Box3D::from_position_size(self.position, Vector3D::new(self.size.x, self.size.z, self.size.y), self.id, 0), // w,l,h
+			Box3D::from_position_size(self.position, Vector3D::new(self.size.z, self.size.x, self.size.y), self.id, 0), // l,w,h
+			Box3D::from_position_size(self.position, Vector3D::new(self.size.y, self.size.z, self.size.x), self.id, 0)  // h,l,w
 		]
 	}
 }

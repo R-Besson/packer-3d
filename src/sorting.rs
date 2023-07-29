@@ -1,3 +1,5 @@
+//! Sorting functions used by [setup_packer](fn.setup_packer.html)
+
 use crate::box3d::Box3D;
 
 use std::cmp::Ordering;
@@ -125,6 +127,7 @@ impl Sorting {
         Self::descending_id(b, a)
     }
 
+    /// Gets the sorting function from a string slice
     pub fn get(name: &str) -> &'static dyn Fn(&Box3D,&Box3D) -> Ordering
     {
         match name
