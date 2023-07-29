@@ -69,16 +69,16 @@ impl Box3D {
 		range_overlap(self.position.z, self.z2(), other.position.z, other.z2())
 	}
 
-    pub fn is_covered_among(&self, boxes: &HashSetFnv<Box3D>) -> bool
+	pub fn is_covered_among(&self, boxes: &HashSetFnv<Box3D>) -> bool
 	{
 		// Iterates through all the shapes and checks if it is covered by a Shape AND
-        for other in boxes.iter() {
+		for other in boxes.iter() {
 			if self.is_in(other) {
-                return true;
+				return true;
 			}
 		}
 
-        false
+		false
 	}
 
 	pub fn get_rotations(&self) -> Vec<Box3D>
