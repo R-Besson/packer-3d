@@ -1,0 +1,16 @@
+[package]
+name = "packer-3d"
+version = "0.1.0"
+authors = ["R. Besson"]
+edition = "2021"
+keywords = ["bin", "box", "packer"]
+description = "Deterministic packing algorithm for 3D container packing which optimizes for width, height, length, or all three."
+license = "CC-BY-NC-SA-4.0"
+repository = "https://github.com/r-besson/packer-3d"
+
+[features]
+default = ["std"]
+std = []
+
+[dependencies]
+fnv = "1.0.7"
