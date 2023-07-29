@@ -3,7 +3,7 @@ use crate::vector3d::*;
 use crate::HashSetFnv;
 
 /// The structure of a 3-dimensional box
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, Default, Hash, Copy, Clone, Debug)]
 pub struct Box3D {
     /// Corresponds to `x`,`y`,`z` properties
 	pub position: Vector3D,

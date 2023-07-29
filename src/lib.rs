@@ -1,10 +1,11 @@
-//! I document lib.rs
+//! Rust Crate for 3-dimensional packing of boxes optimally along x, y or z, or all three axis.
 
 pub mod box3d;
 pub mod vector3d;
 pub mod sorting;
 
 use box3d::*;
+use vector3d::Vector3D;
 use std::cmp::Ordering;
 
 use std::collections::HashSet;
@@ -12,8 +13,23 @@ use std::hash::BuildHasherDefault;
 use fnv::FnvHasher;
 
 /// Hash Set using [fnv](https://crates.io/crates/fnv): an implementation of the [Fowler–Noll–Vo hash function](http://www.isthe.com/chongo/tech/comp/fnv/index.html).
+/// ## Example
+/// ```rust
+/// let mut boxes = HashSetFnv::<Box3D>::default();
+/// boxes.insert(Box3D::from_xyz_whl(0, 0, 0, 100, 200, 300, 1, 0));
+/// ```
 pub type HashSetFnv<V> = HashSet<V, BuildHasherDefault<FnvHasher>>;
 
+/// # Minimize tuple
+/// Dictates which axis (x,y,z) the packer tries to minimize
+/// ## Example
+/// ```rust
+/// // x,    y,     z
+/// (true, false, true)
+/// ```
+/// Will minimize the width (x) of the container,\
+/// and the length (z) of the container\
+/// However, the height (y) of the container will be specified via [setup_packer](setup_packer) and [pack_next](pack_next).
 pub type Minimize = (bool, bool, bool);
 
 fn cut(b: &Box3D, hole: &Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mut u32)
@@ -667,7 +683,8 @@ fn cut(b: &Box3D, hole: &Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mu
     }
 }
 
-fn update_holes(b: &mut Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mut u32)
+fn update_holes(b: &mut Box3D, holes: &mut HashSetFnv<Box3D>, mut next_hole_id: u32)
+-> u32
 {
     // Cut holes
     let mut new_holes = HashSetFnv::<Box3D>::default();
@@ -675,13 +692,15 @@ fn update_holes(b: &mut Box3D, holes: &mut HashSetFnv<Box3D>, next_hole_id: &mut
     for hole in holes.iter() {
         // If the Current Box3D overlaps with a hole, we break the hole into new holes
         if b.intersects(hole) {
-            cut(b, hole, &mut new_holes, next_hole_id);
+            cut(b, hole, &mut new_holes, &mut next_hole_id);
         } else if !hole.is_covered_among(&new_holes) {
             new_holes.insert(*hole);
         }
     }
 
     *holes = new_holes;
+
+    next_hole_id
 }
 
 fn get_new_w(hole: &Box3D, b: &Box3D) -> i32 {
@@ -898,48 +917,91 @@ fn get_best_hole(b: &Box3D, holes: &mut HashSetFnv<Box3D>, do_rotations: bool, m
     (new_box, best_hole)
 }
 
-// PACKER //
-pub fn setup_packer(boxes: &mut [Box3D], w: i32, h: i32, l: i32, minimize: Minimize, sorting_func: &dyn Fn(&Box3D,&Box3D) -> Ordering)
--> (Vec<Box3D>, HashSetFnv<Box3D>)
-{
-    let mut boxes: Vec<Box3D> = boxes.to_owned();
-    boxes.sort_by(sorting_func);
-
-    let mut holes = HashSetFnv::<Box3D>::default();
-    holes.insert(Box3D::from_xyz_whl(0, 0, 0,
-        if minimize.0 {i32::MAX} else {w},
-        if minimize.1 {i32::MAX} else {h},
-        if minimize.2 {i32::MAX} else {l},
-        0,
-        0
-    ));
-
-    (boxes, holes)
+/// Main PackerInstance struct
+/// ## Example
+/// ```rust
+/// let my_boxes = vec![
+///     Box3D::from_xyz_whl(0,0,0,100,200,300,1,0),
+///     Box3D::from_xyz_whl(0,0,0,100,200,300,2,0),
+///     Box3D::from_xyz_whl(0,0,0,100,200,300,3,0)
+/// ];
+/// 
+/// let my_instance = PackerInstance::new(
+///     &mut my_boxes, // Our boxes
+///     Vector3D::new(500, 0, 500), // Our container size
+///     true, // Allow rotations
+///     (false, true, false), // Minimize height only
+///     &Sorting::descending_volume // Our initial sorting heuristic
+/// );
+/// 
+/// for n in 0..3 {
+///     my_instance.pack_next();
+/// }
+/// ```
+#[derive(Default, Debug, Clone)]
+pub struct PackerInstance {
+    pub container_size: Vector3D,
+    pub do_rotations: bool,
+    pub minimize: Minimize,
+    pub boxes: Vec<Box3D>,
+    pub holes: HashSetFnv<Box3D>,
+    pub next_box_id: usize,
+    pub next_hole_id: u32,
 }
 
-pub fn pack_next(b: &mut Box3D, holes: &mut HashSetFnv<Box3D>, do_rotations: bool, w: i32, h: i32, l: i32, v: i32, minimize: Minimize, current_box_idx: usize, mut next_hole_id: u32)
--> (bool, i32, i32, i32, i32, usize, u32)
-{
-    let (best_box, best_hole) = get_best_hole(b, holes, do_rotations, minimize);
-
-    if best_hole.is_none()
+impl PackerInstance {
+    /// Setup the packer
+    pub fn new(boxes: &mut [Box3D], container_size: Vector3D, do_rotations: bool, minimize: Minimize, sorting_func: &dyn Fn(&Box3D,&Box3D) -> Ordering)
+    -> PackerInstance
     {
-        return (false, 0, 0, 0, 0, 0, 0);
+        let mut boxes: Vec<Box3D> = boxes.to_owned();
+        boxes.sort_by(sorting_func);
+
+        let mut holes = HashSetFnv::<Box3D>::default();
+        holes.insert(Box3D::from_xyz_whl(0, 0, 0,
+            if minimize.0 {i32::MAX} else {container_size.x},
+            if minimize.1 {i32::MAX} else {container_size.y},
+            if minimize.2 {i32::MAX} else {container_size.z},
+            0,
+            0
+        ));
+
+        PackerInstance {
+            container_size,
+            do_rotations,
+            minimize,
+            boxes,
+            holes,
+            next_box_id: 0,
+            next_hole_id: 1
+        }
     }
-    let best_hole = best_hole.unwrap();
+
+    /// Do next packing iteration
+    pub fn pack_next(&mut self)
+    {
+        let b = &mut self.boxes[self.next_box_id]; 
+
+        let (best_box, best_hole) = get_best_hole(b, &mut self.holes, self.do_rotations, self.minimize);
+
+        let best_hole = best_hole.unwrap();
+        
+        // Place and rotate (switch sizes) box
+        b.size = best_box.size;
+        b.position = best_hole.position;
     
-    b.size = best_box.size;
-    b.position = best_hole.position;
-
-    let new_w = if minimize.0 { w.max(get_new_w(&best_hole, b)) } else {w};
-    let new_h = if minimize.1 { h.max(get_new_h(&best_hole, b)) } else {h};
-    let new_l = if minimize.2 { l.max(get_new_l(&best_hole, b)) } else {l};
-    let new_v = v + b.volume();
-
-    // Update the holes
-    update_holes(b, holes, &mut next_hole_id);
-
-    let new_box_idx = current_box_idx + 1;
-
-    (true, new_w, new_h, new_l, new_v, new_box_idx, next_hole_id)
+        // Update container size
+        if self.minimize.0 {
+            self.container_size.x = self.container_size.x.max(get_new_w(&best_hole, b));
+        };
+        if self.minimize.1 {
+            self.container_size.y = self.container_size.y.max(get_new_h(&best_hole, b));
+        };
+        if self.minimize.2 {
+            self.container_size.z = self.container_size.z.max(get_new_l(&best_hole, b));
+        };
+    
+        // Update the holes
+        self.next_hole_id = update_holes(b, &mut self.holes, self.next_hole_id)
+    }
 }

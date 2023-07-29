@@ -1,6 +1,6 @@
 //! 3-dimensional vector
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, Default, Hash, Copy, Clone, Debug)]
 pub struct Vector3D {
 	pub x: i32,
 	pub y: i32,
