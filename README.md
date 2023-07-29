@@ -30,14 +30,16 @@ fn main() {
         Box3D::from_xyz_whl(0,0,0,100,200,300,3,0)
     ];
     
+    // Create our packer instance
     let mut my_instance = PackerInstance::new(
         &mut my_boxes, // Our boxes
         Vector3D::new(500, 0, 500), // Our container size
-        true, // No rotations
+        true, // Allow rotations
         (false, true, false), // Minimize height only
         &Sorting::descending_volume // Our initial sorting heuristic
     );
     
+    // Pack all 3 boxes
     for _ in 0..3 {
         my_instance.pack_next();
     }
