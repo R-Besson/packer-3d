@@ -1,7 +1,7 @@
 # packer-3d v0.2.0
 > Rust Crate for 3-dimensional packing of boxes optimally along x, y or z, or all three axis.
 
-![Example of what you can expect](./images/example.png)
+![Example of what you can expect](./images/example.jpg)
 *Example of what you can make*
 
 ## Quickstart
@@ -95,4 +95,4 @@ Which should output:
 ]
 ```
 Visualized this gives:
-![Result Visualized](./images/result.png)
+![Result Visualized](./images/result.jpg)
