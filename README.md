@@ -13,6 +13,8 @@ OR place this under `[dependencies]` in `Cargo.toml`
 packer-3d = "0.2.0"
 ```
 
+## [Documentation](https://docs.rs/packer-3d/latest/packer_3d/)
+
 ## Example
 After adding the dependency, you can test it with this example:
 ```rust
